@@ -2,9 +2,9 @@ package snowflake_test
 
 import (
 	"errors"
+	"glomers/internal/snowflake"
 	"testing"
 	"time"
-	"unique-ids/internal/snowflake"
 )
 
 func TestID(t *testing.T) {

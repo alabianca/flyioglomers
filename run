@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# Build a challenge and run its Maelstrom workload.
+#
+#   ./run echo
+#   ./run unique_ids
+#
+# Any extra arguments are passed through to maelstrom, e.g.
+#   ./run unique_ids --time-limit 60
+
+set -euo pipefail
+
+cd "$(dirname "$0")"
+
+challenge="${1:-}"
+if [[ -z "$challenge" ]]; then
+  echo "usage: ./run <challenge> [extra maelstrom args]" >&2
+  echo "challenges: echo unique_ids" >&2
+  exit 1
+fi
+shift
+
+if [[ ! -d "$challenge" ]]; then
+  echo "unknown challenge: $challenge (no ./$challenge directory)" >&2
+  exit 1
+fi
+
+bin="bin/$challenge"
+maelstrom="./maelstrom/maelstrom"
+
+if [[ ! -x "$maelstrom" ]]; then
+  echo "maelstrom not found at $maelstrom, see README for install steps" >&2
+  exit 1
+fi
+
+# Workload flags per challenge, taken from https://fly.io/dist-sys/
+case "$challenge" in
+  echo)
+    args=(-w echo --node-count 1 --time-limit 10)
+    ;;
+  unique_ids)
+    args=(-w unique-ids --time-limit 30 --rate 1000 --node-count 3 --availability total --nemesis partition)
+    ;;
+  *)
+    echo "no workload configured for '$challenge', add a case to ./run" >&2
+    exit 1
+    ;;
+esac
+
+echo "==> building $bin"
+go build -o "$bin" "./$challenge"
+
+echo "==> running maelstrom: ${args[*]} $*"
+exec "$maelstrom" test --bin "$bin" "${args[@]}" "$@"

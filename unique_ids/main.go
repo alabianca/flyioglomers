@@ -2,10 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"glomers/internal/snowflake"
 	"log"
 	"strconv"
 	"time"
-	"unique-ids/internal/snowflake"
 
 	maelstrom "github.com/jepsen-io/maelstrom/demo/go"
 )

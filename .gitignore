@@ -5,4 +5,4 @@ maelstrom/
 store/
 
 # Built node binaries
-*/bin/
+bin/

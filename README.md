@@ -43,7 +43,7 @@ the Go Maelstrom library, and the test harness all work together.
 Every node must hand out globally unique IDs with no coordination, even while
 the network is partitioned. The solution is a
 [Snowflake](https://en.wikipedia.org/wiki/Snowflake_ID)-style generator in
-`unique_ids/internal/snowflake`: each 64-bit ID packs a millisecond timestamp,
+`internal/snowflake`: each 64-bit ID packs a millisecond timestamp,
 the node's ID, and a per-millisecond sequence counter. Uniqueness falls out of
 the layout rather than any cross-node agreement, so partitions are irrelevant.
 The generator has its own unit tests covering sequence rollover and timestamp
@@ -53,15 +53,20 @@ changes.
 
 ```
 .
+├── go.mod         # Single Go module for the whole repo (module name: glomers)
+├── run            # Build a challenge and run its Maelstrom workload
 ├── echo/          # Challenge 1
 ├── unique_ids/    # Challenge 2
+├── internal/      # Packages shared across challenges (e.g. internal/snowflake)
+├── bin/           # Built node binaries (gitignored)
 ├── maelstrom/     # Maelstrom release, downloaded locally (gitignored)
 └── store/         # Maelstrom test output, one directory per run (gitignored)
 ```
 
-Each challenge is its own Go module with a `main.go` that builds a single node
-binary. The modules depend on `github.com/jepsen-io/maelstrom/demo/go`, Fly's
-thin Go wrapper around the Maelstrom protocol.
+Each challenge directory is a `package main` that builds a single node binary.
+Shared code lives under `internal/` and is imported as `glomers/internal/...`.
+The module depends on `github.com/jepsen-io/maelstrom/demo/go`, Fly's thin Go
+wrapper around the Maelstrom protocol.
 
 ## Running the tests
 
@@ -93,25 +98,29 @@ That leaves `./maelstrom/maelstrom` as the runner used in the commands below.
 
 ### Build and test a challenge
 
-Build the node binary, then point Maelstrom at it with the workload for that
-challenge. For example, challenge 2:
+The `run` script builds a challenge into `bin/<challenge>` and then runs the
+matching Maelstrom workload with the flags from the Fly.io challenge page:
 
 ```sh
-cd unique_ids
-go build -o bin/unique-ids .
-cd ..
-./maelstrom/maelstrom test -w unique-ids --bin ./unique_ids/bin/unique-ids \
+./run echo
+./run unique_ids
+```
+
+Any extra arguments are passed straight to Maelstrom, so you can override or
+extend the defaults:
+
+```sh
+./run unique_ids --time-limit 60
+```
+
+To add a new challenge, create a `<challenge>/main.go` and add a case with its
+workload flags to the `run` script. The equivalent manual invocation looks like:
+
+```sh
+go build -o bin/unique_ids ./unique_ids
+./maelstrom/maelstrom test -w unique-ids --bin bin/unique_ids \
   --time-limit 30 --rate 1000 --node-count 3 --availability total --nemesis partition
 ```
-
-Challenge 1 is the same idea with the `echo` workload:
-
-```sh
-cd echo && go build -o bin/echo . && cd ..
-./maelstrom/maelstrom test -w echo --bin ./echo/bin/echo --node-count 1 --time-limit 10
-```
-
-The exact flags for each challenge are listed on its page on the Fly.io site.
 
 ### Inspecting results
 
@@ -128,10 +137,11 @@ raw message log for each run.
 
 ### Unit tests
 
-Some challenges have plain Go tests alongside the Maelstrom runs:
+Shared packages under `internal/` have plain Go tests alongside the Maelstrom
+runs:
 
 ```sh
-cd unique_ids && go test ./...
+go test ./...
 ```
 
 ## References

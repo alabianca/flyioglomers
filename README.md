@@ -32,22 +32,14 @@ first and then fixing them.
 
 ## Challenge notes
 
-### 1. Echo
+Each challenge directory has its own README with the problem, the approach
+taken, and anything learned along the way.
 
-The "hello world" of Maelstrom. The node receives an `echo` message and replies
-with an `echo_ok` carrying the same payload. Mostly a check that the toolchain,
-the Go Maelstrom library, and the test harness all work together.
-
-### 2. Unique ID Generation
-
-Every node must hand out globally unique IDs with no coordination, even while
-the network is partitioned. The solution is a
-[Snowflake](https://en.wikipedia.org/wiki/Snowflake_ID)-style generator in
-`internal/snowflake`: each 64-bit ID packs a millisecond timestamp,
-the node's ID, and a per-millisecond sequence counter. Uniqueness falls out of
-the layout rather than any cross-node agreement, so partitions are irrelevant.
-The generator has its own unit tests covering sequence rollover and timestamp
-changes.
+- [**1. Echo**](echo/README.md) — the "hello world" of Maelstrom. Reply to
+  `echo` with `echo_ok` and confirm the toolchain works end to end.
+- [**2. Unique ID Generation**](unique_ids/README.md) — hand out globally unique
+  IDs with no coordination, even under partition, using a Snowflake-style
+  generator in `internal/snowflake`.
 
 ## Layout
 
@@ -55,8 +47,8 @@ changes.
 .
 ├── go.mod         # Single Go module for the whole repo (module name: glomers)
 ├── run            # Build a challenge and run its Maelstrom workload
-├── echo/          # Challenge 1
-├── unique_ids/    # Challenge 2
+├── echo/          # Challenge 1, with its own README
+├── unique_ids/    # Challenge 2, with its own README
 ├── internal/      # Packages shared across challenges (e.g. internal/snowflake)
 ├── bin/           # Built node binaries (gitignored)
 ├── maelstrom/     # Maelstrom release, downloaded locally (gitignored)

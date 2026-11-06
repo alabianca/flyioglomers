@@ -55,7 +55,7 @@ changes.
 .
 ├── echo/          # Challenge 1
 ├── unique_ids/    # Challenge 2
-├── maelstrom/     # Maelstrom binary, jar and docs (vendored for convenience)
+├── maelstrom/     # Maelstrom release, downloaded locally (gitignored)
 └── store/         # Maelstrom test output, one directory per run (gitignored)
 ```
 
@@ -77,8 +77,19 @@ On macOS:
 brew install go openjdk graphviz gnuplot
 ```
 
-The Maelstrom release is checked in under `maelstrom/`, so there is nothing
-else to download.
+### Install Maelstrom
+
+The Maelstrom release is not checked in. Download the latest tarball from the
+[releases page](https://github.com/jepsen-io/maelstrom/releases) and unpack it
+into `maelstrom/` at the root of this repo:
+
+```sh
+curl -LO https://github.com/jepsen-io/maelstrom/releases/download/v0.2.3/maelstrom.tar.bz2
+tar -xjf maelstrom.tar.bz2
+rm maelstrom.tar.bz2
+```
+
+That leaves `./maelstrom/maelstrom` as the runner used in the commands below.
 
 ### Build and test a challenge
 
@@ -127,6 +138,6 @@ cd unique_ids && go test ./...
 
 - [Gossip Glomers](https://fly.io/dist-sys/) — the challenge series
 - [Maelstrom](https://github.com/jepsen-io/maelstrom) — the test workbench
-- [Maelstrom protocol](maelstrom/doc/protocol.md) and
-  [workloads](maelstrom/doc/workloads.md) — the vendored docs
+- [Maelstrom protocol](https://github.com/jepsen-io/maelstrom/blob/main/doc/protocol.md) and
+  [workloads](https://github.com/jepsen-io/maelstrom/blob/main/doc/workloads.md) — the docs
 - [Jepsen](https://jepsen.io/) — the consistency checker underneath it all

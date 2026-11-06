@@ -40,6 +40,9 @@ case "$challenge" in
   unique_ids)
     args=(-w unique-ids --time-limit 30 --rate 1000 --node-count 3 --availability total --nemesis partition)
     ;;
+  broadcast)
+    args=(-w broadcast --node-count 1 --time-limit 20 --rate 10)
+    ;;
   *)
     echo "no workload configured for '$challenge', add a case to ./run" >&2
     exit 1
